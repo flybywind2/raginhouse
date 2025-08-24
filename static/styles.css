@@ -1,0 +1,62 @@
+/* Additional styles for RAG Agent UI */
+
+.error-message {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.success-message {
+    background-color: #efe;
+    border: 1px solid #cfc;
+    color: #3c3;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.debug-info {
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.debug-info summary {
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.debug-info pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.performance-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+}
+
+.performance-indicator.good {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.performance-indicator.medium {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.performance-indicator.slow {
+    background-color: #f8d7da;
+    color: #721c24;
+}

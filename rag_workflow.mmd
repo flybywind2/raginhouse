@@ -1,0 +1,27 @@
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	query_rewrite(query_rewrite)
+	retrieve_bm25(retrieve_bm25)
+	retrieve_knn(retrieve_knn)
+	retrieve_cc(retrieve_cc)
+	fuse_and_rerank(fuse_and_rerank)
+	assemble_context(assemble_context)
+	generate_answer(generate_answer)
+	critique_answer(critique_answer)
+	refine_answer(refine_answer)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> query_rewrite;
+	assemble_context --> generate_answer;
+	critique_answer -. &nbsp;end&nbsp; .-> __end__;
+	critique_answer -. &nbsp;refine&nbsp; .-> refine_answer;
+	fuse_and_rerank --> assemble_context;
+	generate_answer --> critique_answer;
+	query_rewrite --> retrieve_bm25;
+	retrieve_bm25 --> retrieve_knn;
+	retrieve_cc --> fuse_and_rerank;
+	retrieve_knn --> retrieve_cc;
+	refine_answer --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

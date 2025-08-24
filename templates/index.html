@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f7;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e5e5e7;
+            margin-bottom: 30px;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #86868b;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab:hover {
+            color: #007aff;
+        }
+        
+        .tab.active {
+            color: #007aff;
+            border-bottom-color: #007aff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            color: #86868b;
+        }
+        
+        .query-form {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .submit-btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+        
+        .submit-btn:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007aff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .response-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .response-container.show {
+            display: block;
+        }
+        
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e5e7;
+        }
+        
+        .response-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .response-time {
+            color: #86868b;
+            font-size: 0.9rem;
+        }
+        
+        .answer-content {
+            margin-bottom: 30px;
+            line-height: 1.7;
+        }
+        
+        .citations {
+            border-top: 1px solid #e5e5e7;
+            padding-top: 20px;
+        }
+        
+        .citations h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #1d1d1f;
+        }
+        
+        .citation {
+            background: #f7f7f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .citation-title {
+            font-weight: 600;
+            color: #007aff;
+            margin-bottom: 5px;
+        }
+        
+        .citation-snippet {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .citation-score {
+            font-size: 0.8rem;
+            color: #86868b;
+        }
+        
+        .feedback {
+            border-top: 1px solid #e5e5e7;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        .feedback h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #1d1d1f;
+        }
+        
+        .feedback-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .feedback-btn {
+            padding: 8px 16px;
+            border: 1px solid #d2d2d7;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .feedback-btn:hover {
+            background: #f7f7f9;
+        }
+        
+        .feedback-btn.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+        
+        .feedback-reason {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .feedback-reason.show {
+            display: block;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #d2d2d7;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #007aff;
+            background-color: #f8f9ff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #007aff;
+            background-color: #f0f8ff;
+        }
+        
+        .file-upload-icon {
+            font-size: 48px;
+            color: #86868b;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-text {
+            color: #86868b;
+            margin-bottom: 10px;
+        }
+        
+        .file-upload-input {
+            display: none;
+        }
+        
+        .uploaded-files {
+            margin-top: 15px;
+        }
+        
+        .uploaded-file {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e5e5e7;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-name {
+            font-weight: 500;
+        }
+        
+        .file-size {
+            color: #86868b;
+            font-size: 0.9rem;
+        }
+        
+        .remove-file {
+            color: #ff3b30;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .status-message.success {
+            background-color: #d1edff;
+            border: 1px solid #007aff;
+            color: #1d1d1f;
+        }
+        
+        .status-message.error {
+            background-color: #ffebee;
+            border: 1px solid #ff3b30;
+            color: #1d1d1f;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e5e5e7;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #007aff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .response-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <p>Enterprise RAG Agent with LangGraph Orchestration</p>
+        </div>
+        
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('query')">🔍 Query Documents</button>
+            <button class="tab" onclick="switchTab('upload')">📁 Upload Documents</button>
+            <button class="tab" onclick="switchTab('confluence')">📄 Confluence Import</button>
+        </div>
+        
+        <!-- Query Tab -->
+        <div class="tab-content active" id="queryTab">
+            <form class="query-form" id="queryForm">
+            <div class="form-group">
+                <label for="queryText">Your Question</label>
+                <textarea 
+                    id="queryText" 
+                    name="query_text" 
+                    placeholder="Ask any question about your documents..."
+                    required
+                ></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="indexName">Index Name</label>
+                    <input 
+                        type="text" 
+                        id="indexName" 
+                        name="index_name" 
+                        value="default_index"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="retriever">Retrieval Method</label>
+                    <select id="retriever" name="retriever">
+                        <option value="rrf" selected>RRF (Reciprocal Rank Fusion)</option>
+                        <option value="bm25">BM25 (Keyword Search)</option>
+                        <option value="knn">kNN (Vector Search)</option>
+                        <option value="cc">CC (Column Conditions)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="model">LLM Model</label>
+                    <select id="model" name="model">
+                        <option value="llama4 maverick" selected>Llama4 Maverick</option>
+                        <option value="llama4 scout">Llama4 Scout</option>
+                        <option value="gemma3">Gemma3</option>
+                        <option value="deepseek-r1">DeepSeek R1</option>
+                        <option value="gpt-oss">GPT OSS</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <!-- Permission groups removed for simplicity -->
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numDocs">Number of Documents</label>
+                    <select id="numDocs" name="num_result_doc">
+                        <option value="3">3</option>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="answerFormat">Answer Format</label>
+                    <select id="answerFormat" name="answer_format">
+                        <option value="markdown" selected>Markdown</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="workflowMode">Workflow Mode</label>
+                    <select id="workflowMode" name="workflow_mode">
+                        <option value="standard">Standard (Sequential)</option>
+                        <option value="optimized" selected>Optimized (Parallel + Caching)</option>
+                    </select>
+                    <small style="color: #666; font-size: 12px;">
+                        Optimized mode uses parallel processing and caching for better performance
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <!-- Empty space for layout balance -->
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Ask Question
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your question...</p>
+        </div>
+        
+        <div class="response-container" id="responseContainer">
+            <div class="response-header">
+                <h2 class="response-title">Answer</h2>
+                <span class="response-time" id="responseTime"></span>
+            </div>
+            
+            <div class="answer-content" id="answerContent"></div>
+            
+            <div class="citations" id="citationsContainer">
+                <h3>Sources</h3>
+                <div id="citationsList"></div>
+            </div>
+            
+            <div class="feedback">
+                <h3>Was this helpful?</h3>
+                <div class="feedback-buttons">
+                    <button class="feedback-btn" data-rating="up">👍 Yes</button>
+                    <button class="feedback-btn" data-rating="down">👎 No</button>
+                </div>
+                <div class="feedback-reason" id="feedbackReason">
+                    <textarea 
+                        id="reasonText" 
+                        placeholder="Please tell us why this wasn't helpful..."
+                        rows="3"
+                    ></textarea>
+                    <button type="button" id="submitFeedback" class="submit-btn" style="margin-top: 10px;">
+                        Submit Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+        
+        <!-- Upload Documents Tab -->
+        <div class="tab-content" id="uploadTab">
+            <div class="query-form">
+                <h2 style="margin-bottom: 20px;">📁 Upload Documents</h2>
+                
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label for="uploadIndexName">Index Name</label>
+                        <input 
+                            type="text" 
+                            id="uploadIndexName" 
+                            name="index_name" 
+                            value="default_index"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="uploadPermissionGroups">Permission Groups (comma-separated)</label>
+                        <input 
+                            type="text" 
+                            id="uploadPermissionGroups" 
+                            name="permission_groups" 
+                            value="user"
+                            placeholder="user, admin, team"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Select Files</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <div class="file-upload-icon">📄</div>
+                            <div class="file-upload-text">
+                                <strong>Click to browse</strong> or drag and drop files here
+                            </div>
+                            <div class="file-upload-text">
+                                Supported formats: PDF, DOCX, PPTX, XLSX, TXT
+                            </div>
+                            <input 
+                                type="file" 
+                                id="fileUploadInput" 
+                                class="file-upload-input" 
+                                multiple 
+                                accept=".pdf,.docx,.pptx,.xlsx,.txt,.doc,.ppt,.xls"
+                            >
+                        </div>
+                        
+                        <div class="uploaded-files" id="uploadedFiles"></div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="uploadBtn">
+                        Upload Documents
+                    </button>
+                </form>
+                
+                <div id="uploadStatus"></div>
+            </div>
+        </div>
+        
+        <!-- Confluence Import Tab -->
+        <div class="tab-content" id="confluenceTab">
+            <div class="query-form">
+                <h2 style="margin-bottom: 20px;">📄 Import from Confluence DC</h2>
+                
+                <form id="confluenceForm">
+                    <div class="form-group">
+                        <label for="confluenceBaseUrl">Confluence Base URL</label>
+                        <input 
+                            type="url" 
+                            id="confluenceBaseUrl" 
+                            name="base_url" 
+                            placeholder="https://your-confluence.company.com"
+                            required
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confluencePageId">Page ID</label>
+                        <input 
+                            type="text" 
+                            id="confluencePageId" 
+                            name="page_id" 
+                            placeholder="123456789"
+                            required
+                        >
+                        <small style="color: #86868b; font-size: 0.9rem; margin-top: 5px; display: block;">
+                            You can find the Page ID in the URL when viewing a Confluence page
+                        </small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confluenceIndexName">Index Name</label>
+                        <input 
+                            type="text" 
+                            id="confluenceIndexName" 
+                            name="index_name" 
+                            value="confluence_index"
+                            required
+                        >
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="confluenceBtn">
+                        Import Page
+                    </button>
+                </form>
+                
+                <div id="confluenceStatus"></div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #f7f7f9; border-radius: 8px;">
+                    <h3 style="margin-bottom: 15px; color: #1d1d1f;">ℹ️ How to find Page ID</h3>
+                    <ol style="color: #666; line-height: 1.6;">
+                        <li>Go to the Confluence page you want to import</li>
+                        <li>Look at the URL in your browser</li>
+                        <li>Find the number after "/pages/" or "/display/" - this is your Page ID</li>
+                        <li>Example: <code style="background: #e5e5e7; padding: 2px 4px; border-radius: 3px;">
+                            https://confluence.company.com/display/SPACE/Page+Title?pageId=<strong>123456789</strong>
+                        </code></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTraceId = null;
+        
+        document.getElementById('queryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            
+            const workflowMode = formData.get('workflow_mode') || 'standard';
+            const data = {
+                query_text: formData.get('query_text'),
+                index_name: formData.get('index_name'),
+                retriever: formData.get('retriever'),
+                num_result_doc: parseInt(formData.get('num_result_doc')),
+                model: formData.get('model'),
+                answer_format: formData.get('answer_format')
+            };
+            
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('responseContainer').classList.remove('show');
+            document.getElementById('submitBtn').disabled = true;
+            
+            try {
+                // Choose endpoint based on workflow mode
+                const endpoint = workflowMode === 'optimized' ? '/api/v1/ask/optimized' : '/api/v1/ask';
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Store trace ID for feedback
+                currentTraceId = result.trace_id;
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('show');
+                
+                // Show response
+                displayResponse(result);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').classList.remove('show');
+                alert('Error processing your question. Please try again.');
+            } finally {
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+        
+        function displayResponse(result) {
+            // Update response time
+            document.getElementById('responseTime').textContent = 
+                `${Math.round(result.latency_ms)}ms`;
+            
+            // Update answer content
+            const answerDiv = document.getElementById('answerContent');
+            if (result.answer) {
+                // Simple markdown-like formatting
+                let formattedAnswer = result.answer
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+                answerDiv.innerHTML = formattedAnswer;
+            }
+            
+            // Update citations
+            const citationsList = document.getElementById('citationsList');
+            citationsList.innerHTML = '';
+            
+            if (result.citations && result.citations.length > 0) {
+                result.citations.forEach(citation => {
+                    const citationDiv = document.createElement('div');
+                    citationDiv.className = 'citation';
+                    citationDiv.innerHTML = `
+                        <div class="citation-title">[${citation.doc_id}] ${citation.title}</div>
+                        <div class="citation-snippet">${citation.snippet}</div>
+                        <div class="citation-score">Relevance Score: ${citation.score.toFixed(3)}</div>
+                    `;
+                    citationsList.appendChild(citationDiv);
+                });
+            } else {
+                citationsList.innerHTML = '<p>No sources found.</p>';
+            }
+            
+            // Show response container
+            document.getElementById('responseContainer').classList.add('show');
+            
+            // Reset feedback
+            resetFeedback();
+        }
+        
+        function resetFeedback() {
+            document.querySelectorAll('.feedback-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('feedbackReason').classList.remove('show');
+            document.getElementById('reasonText').value = '';
+        }
+        
+        // Feedback handling
+        document.querySelectorAll('.feedback-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Show reason textarea for negative feedback
+                const rating = this.dataset.rating;
+                const reasonDiv = document.getElementById('feedbackReason');
+                
+                if (rating === 'down') {
+                    reasonDiv.classList.add('show');
+                } else {
+                    reasonDiv.classList.remove('show');
+                    // Submit positive feedback immediately
+                    submitFeedback(rating);
+                }
+            });
+        });
+        
+        document.getElementById('submitFeedback').addEventListener('click', function() {
+            const activeBtn = document.querySelector('.feedback-btn.active');
+            if (activeBtn) {
+                submitFeedback(activeBtn.dataset.rating);
+            }
+        });
+        
+        async function submitFeedback(rating) {
+            if (!currentTraceId) {
+                alert('No trace ID available for feedback');
+                return;
+            }
+            
+            const reason = document.getElementById('reasonText').value;
+            
+            const feedbackData = {
+                trace_id: currentTraceId,
+                rating: rating,
+                reason: reason || null
+            };
+            
+            try {
+                const response = await fetch('/api/v1/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(feedbackData)
+                });
+                
+                if (response.ok) {
+                    alert('Thank you for your feedback!');
+                } else {
+                    alert('Failed to submit feedback. Please try again.');
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                alert('Error submitting feedback. Please try again.');
+            }
+        }
+        
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Remove active class from all tabs and tab contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab
+            event.target.classList.add('active');
+            
+            // Show corresponding tab content
+            const tabContent = document.getElementById(tabName + 'Tab');
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+        }
+        
+        // File upload functionality
+        let selectedFiles = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileUploadInput = document.getElementById('fileUploadInput');
+            const uploadedFilesDiv = document.getElementById('uploadedFiles');
+            
+            // Click to browse files
+            fileUploadArea.addEventListener('click', () => {
+                fileUploadInput.click();
+            });
+            
+            // Drag and drop functionality
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+            
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+            
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                addFiles(files);
+            });
+            
+            // File input change
+            fileUploadInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                addFiles(files);
+            });
+        });
+        
+        function addFiles(files) {
+            const allowedExtensions = ['.pdf', '.docx', '.pptx', '.xlsx', '.txt', '.doc', '.ppt', '.xls'];
+            
+            files.forEach(file => {
+                const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+                
+                if (!allowedExtensions.includes(fileExtension)) {
+                    showStatus('uploadStatus', `File ${file.name} has unsupported format. Allowed: ${allowedExtensions.join(', ')}`, 'error');
+                    return;
+                }
+                
+                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push(file);
+                }
+            });
+            
+            updateFileList();
+        }
+        
+        function updateFileList() {
+            const uploadedFilesDiv = document.getElementById('uploadedFiles');
+            uploadedFilesDiv.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'uploaded-file';
+                fileDiv.innerHTML = `
+                    <div class="file-info">
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">(${formatFileSize(file.size)})</span>
+                    </div>
+                    <div class="remove-file" onclick="removeFile(${index})">🗑️</div>
+                `;
+                uploadedFilesDiv.appendChild(fileDiv);
+            });
+        }
+        
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function showStatus(elementId, message, type) {
+            const statusDiv = document.getElementById(elementId);
+            statusDiv.innerHTML = `<div class="status-message ${type}">${message}</div>`;
+            
+            // Auto-hide after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
+        
+        // Upload form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (selectedFiles.length === 0) {
+                showStatus('uploadStatus', 'Please select at least one file to upload.', 'error');
+                return;
+            }
+            
+            const indexName = document.getElementById('uploadIndexName').value;
+            const permissionGroups = document.getElementById('uploadPermissionGroups').value
+                .split(',').map(s => s.trim()).filter(s => s);
+            
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const file of selectedFiles) {
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('index_name', indexName);
+                    permissionGroups.forEach(group => {
+                        formData.append('permission_groups', group);
+                    });
+                    
+                    const response = await fetch('/api/v1/ingest/file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                        console.error(`Failed to upload ${file.name}`);
+                    }
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Error uploading ${file.name}:`, error);
+                }
+            }
+            
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Upload Documents';
+            
+            if (errorCount === 0) {
+                showStatus('uploadStatus', 
+                    `✅ Successfully uploaded ${successCount} file(s). Documents are being processed in the background.`, 
+                    'success');
+                selectedFiles = [];
+                updateFileList();
+            } else if (successCount > 0) {
+                showStatus('uploadStatus', 
+                    `⚠️ Uploaded ${successCount} file(s) successfully, ${errorCount} failed. Check console for details.`, 
+                    'error');
+            } else {
+                showStatus('uploadStatus', 
+                    `❌ Failed to upload files. Please try again.`, 
+                    'error');
+            }
+        });
+        
+        // Confluence form submission
+        document.getElementById('confluenceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                base_url: formData.get('base_url'),
+                page_id: formData.get('page_id'),
+                index_name: formData.get('index_name')
+            };
+            
+            const confluenceBtn = document.getElementById('confluenceBtn');
+            confluenceBtn.disabled = true;
+            confluenceBtn.textContent = 'Importing...';
+            
+            try {
+                const response = await fetch('/api/v1/ingest/confluence', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showStatus('confluenceStatus', 
+                        `✅ ${result.message} The page will be processed in the background.`, 
+                        'success');
+                    document.getElementById('confluenceForm').reset();
+                    document.getElementById('confluenceIndexName').value = 'confluence_index';
+                } else {
+                    const errorData = await response.json();
+                    showStatus('confluenceStatus', 
+                        `❌ Failed to import Confluence page: ${errorData.detail}`, 
+                        'error');
+                }
+            } catch (error) {
+                console.error('Confluence import error:', error);
+                showStatus('confluenceStatus', 
+                    '❌ Error importing Confluence page. Please try again.', 
+                    'error');
+            } finally {
+                confluenceBtn.disabled = false;
+                confluenceBtn.textContent = 'Import Page';
+            }
+        });
+    </script>
+</body>
+</html>
