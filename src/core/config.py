@@ -6,6 +6,7 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     # External API Configuration (compatible with appendix)
+    # 초보자용: 환경변수(.env)로 설정값을 주입합니다. 기본값이 있는 항목은 미설정 시 기본값 사용.
     RAG_BASE_URL: str = Field(default="http://localhost:8000", description="RAG API base URL")
     RAG_API_KEY: str = Field(..., description="RAG API key")
     DEP_TICKET: str = Field(..., description="Department ticket credential")
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
     RETRIEVER: str = Field(default="rrf", description="Default retriever type")
     
     # LLM Configuration (compatible with internal_llm.py)
+    # 초보자용: 모델 이름과 엔드포인트 매핑을 통해 동적으로 호출 대상을 바꿀 수 있습니다.
     OPENAI_API_KEY: str = Field(..., description="OpenAI API key")
     LLM_BASE_URL: str = Field(default="https://model1.openai.com/v1", description="LLM base URL")
     MODEL_NAME: str = Field(default="llama4 maverick", description="Default model name")
@@ -82,7 +84,11 @@ settings = Settings()
 
 # Header configuration for external API calls (from appendix examples)
 def get_rag_headers() -> Dict[str, str]:
-    """Get headers for RAG API calls (compatible with appendix examples)"""
+    """Get headers for RAG API calls (compatible with appendix examples)
+
+    초보자용 설명:
+    - 외부 RAG API 호출 시 공통으로 포함할 헤더를 만듭니다.
+    """
     return {
         "Content-Type": "application/json",
         "x-dep-ticket": settings.DEP_TICKET,
@@ -91,7 +97,11 @@ def get_rag_headers() -> Dict[str, str]:
 
 
 def get_llm_headers() -> Dict[str, str]:
-    """Get headers for LLM API calls (compatible with internal_llm.py)"""
+    """Get headers for LLM API calls (compatible with internal_llm.py)
+
+    초보자용 설명:
+    - 내부 규약에 맞춘 공통 헤더(요청 식별자 등)를 생성합니다.
+    """
     import uuid
     return {
         "x-dep-ticket": settings.DEP_TICKET,
@@ -104,7 +114,11 @@ def get_llm_headers() -> Dict[str, str]:
 
 
 def get_model_endpoint(model_name: str) -> str:
-    """Get LLM endpoint for given model"""
+    """Get LLM endpoint for given model
+
+    초보자용 설명:
+    - 모델 이름으로 적절한 엔드포인트 URL을 돌려줍니다. 없으면 기본값 사용.
+    """
     return settings.MODEL_ENDPOINTS.get(model_name, settings.LLM_BASE_URL)
 
 

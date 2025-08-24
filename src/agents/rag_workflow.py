@@ -15,9 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 class RAGWorkflow:
-    """LangGraph-based RAG workflow orchestrator"""
+    """LangGraph-based RAG workflow orchestrator
+
+    초보자용 설명:
+    - 이 클래스는 질문을 받으면 '검색 → 문맥 구성 → 답변 생성' 단계를 순서대로 실행합니다.
+    - LangGraph의 그래프(노드/간선)를 사용해 각 단계를 연결합니다.
+    """
     
     def __init__(self):
+        # 각 기능을 담당하는 클라이언트/서비스를 준비합니다.
         self.retriever_client = RetrieverClient()
         self.llm_client = LLMClient()
         self.cache_service = CacheService()
@@ -29,10 +35,16 @@ class RAGWorkflow:
         self.workflow = self._build_workflow()
     
     def _build_workflow(self) -> StateGraph:
-        """Build the LangGraph workflow"""
+        """Build the LangGraph workflow
+
+        초보자용 설명:
+        - 그래프에 '노드(작업)'를 추가하고, 실행 순서를 '간선(연결)'으로 정의합니다.
+        - 여기서는 신뢰성을 위해 순차 실행을 사용합니다.
+        """
         workflow = StateGraph(RAGState)
         
         # Add nodes
+        # 각 노드는 하나의 작업(예: 질의 확장, 검색 등)을 수행합니다.
         workflow.add_node("query_rewrite", self._query_rewrite_node)
         workflow.add_node("retrieve_bm25", self._retrieve_bm25_node)
         workflow.add_node("retrieve_knn", self._retrieve_knn_node)
@@ -44,6 +56,7 @@ class RAGWorkflow:
         workflow.add_node("refine_answer", self._refine_answer_node)
         
         # Define the flow - Sequential execution for reliability
+        # START → 질의 확장 → 순차 검색(BM25→kNN→CC) → 융합/재정렬 → 문맥 구성 → 답변 생성 → 평가 → (필요 시) 개선 → END
         workflow.add_edge(START, "query_rewrite")
         
         # Sequential retrieval to avoid LangGraph parallel execution issues
@@ -74,7 +87,11 @@ class RAGWorkflow:
         return workflow.compile()
     
     async def _query_rewrite_node(self, state: RAGState) -> RAGState:
-        """Multi-query expansion with semantic similarity clustering"""
+        """Multi-query expansion with semantic similarity clustering
+
+        초보자용 설명:
+        - 하나의 질문을 여러 표현으로 바꿔서 더 다양한 문서를 찾기 쉽게 합니다.
+        """
         start_time = time.time()
         logger.info(f"Query rewrite for: {state['query_raw'][:50]}")
         
@@ -109,7 +126,12 @@ class RAGWorkflow:
         return await self._retrieve_node(state, RetrieverType.CC)
     
     async def _retrieve_node(self, state: RAGState, retriever_type: RetrieverType) -> RAGState:
-        """Generic retrieval node implementation"""
+        """Generic retrieval node implementation
+
+        초보자용 설명:
+        - 확장된 여러 질의로 검색 API를 호출하고 결과를 모읍니다.
+        - 검색기는 BM25, kNN, CC 중 하나입니다.
+        """
         start_time = time.time()
         logger.info(f"Retrieving with {retriever_type.value}")
         
@@ -145,7 +167,12 @@ class RAGWorkflow:
             raise e
     
     async def _fuse_and_rerank_node(self, state: RAGState) -> RAGState:
-        """RRF fusion and reranking node"""
+        """RRF fusion and reranking node
+
+        초보자용 설명:
+        - 서로 다른 검색기의 결과를 RRF(Reciprocal Rank Fusion)로 합칩니다.
+        - 필요하면 교차 인코더로 점수를 다시 매겨 상위 결과를 고릅니다.
+        """
         start_time = time.time()
         logger.info("Fusing and reranking results")
         
@@ -172,7 +199,12 @@ class RAGWorkflow:
             raise e
     
     async def _assemble_context_node(self, state: RAGState) -> RAGState:
-        """Context assembly with MMR selection"""
+        """Context assembly with MMR selection
+
+        초보자용 설명:
+        - MMR(Maximal Marginal Relevance)로 비슷한 문서만 몰리지 않도록 다양하게 선택합니다.
+        - 선택된 문서로 답변에 사용할 '문맥 텍스트'를 만듭니다.
+        """
         start_time = time.time()
         logger.info("Assembling context")
         
@@ -217,7 +249,11 @@ class RAGWorkflow:
             raise e
     
     async def _generate_answer_node(self, state: RAGState) -> RAGState:
-        """Answer generation node"""
+        """Answer generation node
+
+        초보자용 설명:
+        - LLM을 사용해 문맥을 바탕으로 답변 초안을 만듭니다.
+        """
         start_time = time.time()
         logger.info("Generating answer")
         
@@ -241,7 +277,11 @@ class RAGWorkflow:
             raise e
     
     async def _critique_answer_node(self, state: RAGState) -> RAGState:
-        """Answer critique and quality assessment"""
+        """Answer critique and quality assessment
+
+        초보자용 설명:
+        - 생성된 답변을 자체 평가하여 보완이 필요한지 판단합니다.
+        """
         start_time = time.time()
         logger.info("Critiquing answer")
         
@@ -264,7 +304,11 @@ class RAGWorkflow:
             raise e
     
     async def _refine_answer_node(self, state: RAGState) -> RAGState:
-        """Answer refinement node"""
+        """Answer refinement node
+
+        초보자용 설명:
+        - 필요 시 답변을 한 번 더 다듬어 최종 품질을 높입니다.
+        """
         start_time = time.time()
         logger.info("Refining answer")
         
@@ -301,7 +345,12 @@ class RAGWorkflow:
         model: Optional[str] = None,
         answer_format: str = "markdown"
     ) -> Dict[str, Any]:
-        """Execute the complete RAG workflow"""
+        """Execute the complete RAG workflow
+
+        초보자용 설명:
+        - 입력 질문으로부터 전체 파이프라인을 비동기로 실행하고, 최종 답변과 디버그 정보를 돌려줍니다.
+        - latency_map에는 각 단계의 처리 시간이 밀리초(ms)로 기록됩니다.
+        """
         start_time = time.time()
         trace_id = str(uuid.uuid4())
         

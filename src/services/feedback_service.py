@@ -8,7 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 class FeedbackService:
-    """Service for handling user feedback and metrics"""
+    """Service for handling user feedback and metrics
+
+    초보자용 설명:
+    - 사용자가 남긴 피드백(업/다운, 사유 등)을 메모리에 저장합니다(MVP).
+    - 간단한 지표(긍정 비율, 사유별 카운트 등)를 계산합니다.
+    """
     
     def __init__(self):
         # For MVP, store feedback in memory
@@ -16,7 +21,11 @@ class FeedbackService:
         self.feedback_storage: List[Dict[str, Any]] = []
     
     async def store_feedback(self, feedback: FeedbackRequest) -> bool:
-        """Store user feedback"""
+        """Store user feedback
+
+        초보자용 설명:
+        - 입력 모델을 딕셔너리로 변환해 리스트에 저장합니다.
+        """
         try:
             feedback_data = {
                 "trace_id": feedback.trace_id,
@@ -38,7 +47,11 @@ class FeedbackService:
             return False
     
     async def get_metrics(self) -> Dict[str, Any]:
-        """Get feedback and performance metrics"""
+        """Get feedback and performance metrics
+
+        초보자용 설명:
+        - 현재 저장된 피드백을 바탕으로 간단한 통계를 계산합니다.
+        """
         try:
             if not self.feedback_storage:
                 return {
@@ -81,7 +94,11 @@ class FeedbackService:
             }
     
     async def get_feedback_by_trace_id(self, trace_id: str) -> Dict[str, Any]:
-        """Get feedback for specific trace ID"""
+        """Get feedback for specific trace ID
+
+        초보자용 설명:
+        - 특정 트레이스 ID에 해당하는 피드백을 찾아 반환합니다.
+        """
         try:
             for feedback in self.feedback_storage:
                 if feedback["trace_id"] == trace_id:
@@ -93,5 +110,9 @@ class FeedbackService:
             return {}
     
     async def export_feedback(self) -> List[Dict[str, Any]]:
-        """Export all feedback data"""
+        """Export all feedback data
+
+        초보자용 설명:
+        - 저장된 피드백 전체를 복사본으로 돌려줍니다.
+        """
         return self.feedback_storage.copy()

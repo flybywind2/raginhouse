@@ -29,6 +29,10 @@ class OptimizedRAGWorkflow:
     - Intelligent caching with TTL policy  
     - Optimized node execution order
     - Advanced fusion and reranking
+    
+    초보자용 설명:
+    - 검색 단계를 병렬로 실행하여 속도를 높입니다.
+    - 중간 결과를 캐시에 저장해 반복 요청을 빠르게 처리합니다.
     """
     
     def __init__(self):
@@ -44,7 +48,12 @@ class OptimizedRAGWorkflow:
         self.workflow = self._build_optimized_workflow()
 
     def _stable_hash(self, obj: Any) -> str:
-        """Create a stable hash for cache keys from arbitrary objects."""
+        """Create a stable hash for cache keys from arbitrary objects.
+
+        초보자용 설명:
+        - 파이썬 내장 hash()는 실행마다 값이 달라질 수 있어 캐시에 부적합합니다.
+        - json으로 직렬화 후 SHA-1 해시를 써서 항상 같은 키를 만듭니다.
+        """
         try:
             data = json.dumps(obj, sort_keys=True, ensure_ascii=False, default=str)
         except Exception:
@@ -52,7 +61,12 @@ class OptimizedRAGWorkflow:
         return hashlib.sha1(data.encode("utf-8")).hexdigest()
     
     def _build_optimized_workflow(self) -> StateGraph:
-        """Build the optimized LangGraph workflow with parallel processing"""
+        """Build the optimized LangGraph workflow with parallel processing
+
+        초보자용 설명:
+        - 질의 확장 후 BM25/kNN/CC 검색 노드를 병렬로 실행합니다.
+        - 세 검색이 모두 끝나면 융합/재랭킹 → 문맥 선택 → 답변 생성 → 평가/개선 순서로 진행합니다.
+        """
         workflow = StateGraph(RAGState)
         
         # Add nodes
@@ -109,7 +123,11 @@ class OptimizedRAGWorkflow:
         ]
     
     async def _query_expansion_node(self, state: RAGState) -> RAGState:
-        """Optimized query expansion with intelligent caching"""
+        """Optimized query expansion with intelligent caching
+
+        초보자용 설명:
+        - 질문을 여러 표현으로 확장합니다. 동일 질문은 캐시에서 빠르게 가져옵니다.
+        """
         start_time = time.time()
         logger.info(f"Expanding query: {state['query_raw'][:50]}")
         
@@ -141,7 +159,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _retrieve_bm25_node(self, state: RAGState) -> RAGState:
-        """BM25 retrieval node with caching"""
+        """BM25 retrieval node with caching
+
+        초보자용 설명:
+        - 키워드 기반 전통 검색입니다. 질의별 결과를 캐시에 보관합니다.
+        """
         start_time = time.time()
         logger.info("Starting BM25 retrieval")
         
@@ -184,7 +206,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _retrieve_knn_node(self, state: RAGState) -> RAGState:
-        """kNN retrieval node with caching"""
+        """kNN retrieval node with caching
+
+        초보자용 설명:
+        - 임베딩 유사도 기반 검색입니다. 결과를 캐시에 보관합니다.
+        """
         start_time = time.time()
         logger.info("Starting kNN retrieval")
         
@@ -227,7 +253,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _retrieve_cc_node(self, state: RAGState) -> RAGState:
-        """CC retrieval node with caching"""
+        """CC retrieval node with caching
+
+        초보자용 설명:
+        - 커스텀/결합형 검색(환경에 따라 달라질 수 있음)으로 가정합니다. 결과를 캐시에 보관합니다.
+        """
         start_time = time.time()
         logger.info("Starting CC retrieval")
         
@@ -270,7 +300,12 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _fusion_and_rerank_node(self, state: RAGState) -> RAGState:
-        """RRF fusion and reranking node with caching"""
+        """RRF fusion and reranking node with caching
+
+        초보자용 설명:
+        - 서로 다른 검색기의 결과를 RRF로 합치고, 필요하면 교차 인코더로 재정렬합니다.
+        - 이 중간 결과도 캐시하여 성능을 높입니다.
+        """
         start_time = time.time()
         logger.info("Fusing and reranking results")
         
@@ -312,7 +347,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _context_selection_node(self, state: RAGState) -> RAGState:
-        """MMR context selection with caching"""
+        """MMR context selection with caching
+
+        초보자용 설명:
+        - MMR를 사용해 중복을 줄이고, 다양한 문서를 선별해 문맥을 만듭니다.
+        """
         start_time = time.time()
         logger.info("Selecting context")
         
@@ -367,7 +406,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _answer_generation_node(self, state: RAGState) -> RAGState:
-        """LLM answer generation with caching"""
+        """LLM answer generation with caching
+
+        초보자용 설명:
+        - 문맥을 바탕으로 LLM이 답변 초안을 생성합니다. 동일 입력이면 캐시를 사용합니다.
+        """
         start_time = time.time()
         logger.info("Generating answer")
         
@@ -403,7 +446,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _answer_critique_node(self, state: RAGState) -> RAGState:
-        """Answer critique and quality assessment"""
+        """Answer critique and quality assessment
+
+        초보자용 설명:
+        - 생성된 답변의 품질을 체크해 개선 필요 여부를 기록합니다.
+        """
         start_time = time.time()
         logger.info("Critiquing answer")
         
@@ -426,7 +473,11 @@ class OptimizedRAGWorkflow:
             raise e
     
     async def _answer_refinement_node(self, state: RAGState) -> RAGState:
-        """Answer refinement node"""
+        """Answer refinement node
+
+        초보자용 설명:
+        - 필요 시 평가 결과를 반영해 답변을 개선합니다.
+        """
         start_time = time.time()
         logger.info("Refining answer")
         
@@ -463,7 +514,11 @@ class OptimizedRAGWorkflow:
         model: Optional[str] = None,
         answer_format: str = "markdown"
     ) -> Dict[str, Any]:
-        """Execute the optimized RAG workflow with LangGraph StateGraph"""
+        """Execute the optimized RAG workflow with LangGraph StateGraph
+
+        초보자용 설명:
+        - 표준 워크플로우와 같은 형태의 응답을 돌려주며, 캐시/병렬처리로 속도를 개선합니다.
+        """
         start_time = time.time()
         trace_id = str(uuid.uuid4())
         

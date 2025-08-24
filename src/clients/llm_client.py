@@ -14,6 +14,10 @@ class LLMClient:
     """
     LLM Client compatible with internal_llm.py pattern
     Supports dynamic model selection and proper header management
+
+    초보자용 설명:
+    - LLM(대규모 언어 모델)과 대화하는 클라이언트입니다.
+    - 모델 이름을 바꾸거나, 공통 헤더를 붙여 호출할 수 있습니다.
     """
     
     def __init__(self, model_name: Optional[str] = None):
@@ -39,7 +43,11 @@ class LLMClient:
         messages: List[Dict[str, str]],
         system_prompt: Optional[str] = None
     ) -> str:
-        """Generate response from messages"""
+        """Generate response from messages
+
+        초보자용 설명:
+        - 시스템/사용자/어시스턴트 메시지를 순서대로 전달해 LLM 응답을 받습니다.
+        """
         try:
             # Convert dict messages to LangChain message objects
             langchain_messages = []
@@ -69,7 +77,11 @@ class LLMClient:
         num_variants: int = 3,
         similarity_threshold: float = 0.85
     ) -> List[str]:
-        """Multi-query expansion for improved retrieval"""
+        """Multi-query expansion for improved retrieval
+
+        초보자용 설명:
+        - 원래 질문과 의미가 비슷하지만 표현이 다른 질의들을 만들어 검색 성능을 높입니다.
+        """
         system_prompt = """You are an expert at query expansion for information retrieval.
         Generate semantically diverse but related query variants that would help retrieve relevant documents.
         Each variant should maintain the core intent while exploring different phrasings, synonyms, and related concepts.
@@ -178,7 +190,12 @@ class LLMClient:
         citations: List[Dict[str, Any]],
         answer_format: str = "markdown"
     ) -> str:
-        """Generate final answer based on context and citations"""
+        """Generate final answer based on context and citations
+
+        초보자용 설명:
+        - 인용 문맥을 바탕으로 질문에 대한 최종 답변을 생성합니다.
+        - 답변 안에 [doc_id] 형태로 인용 표시를 포함하도록 유도합니다.
+        """
         system_prompt = f"""You are a helpful AI assistant that answers questions based solely on the provided context.
 
         IMPORTANT INSTRUCTIONS:
@@ -224,7 +241,12 @@ class LLMClient:
         answer: str,
         context: str
     ) -> Dict[str, Any]:
-        """Self-critique the generated answer"""
+        """Self-critique the generated answer
+
+        초보자용 설명:
+        - 생성된 답변을 평가해 정확성/관련성/완전성 등을 진단합니다.
+        - 개선 필요 여부(NEEDS_REFINEMENT)를 반환합니다.
+        """
         system_prompt = """You are a critical evaluator of AI-generated answers. Analyze the provided answer for:
         1. Factual accuracy based on the context
         2. Relevance to the question
@@ -296,7 +318,11 @@ class LLMClient:
         context: str,
         answer_format: str = "markdown"
     ) -> str:
-        """Refine answer based on critique"""
+        """Refine answer based on critique
+
+        초보자용 설명:
+        - 비평(critique)을 바탕으로 답변을 더 정확하고 완전하게 개선합니다.
+        """
         system_prompt = f"""You are a helpful AI assistant that refines answers based on feedback.
         
         Your task is to improve the draft answer by addressing the critique points while maintaining the {answer_format} format.

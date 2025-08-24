@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Performance comparison test between standard and optimized RAG workflows
+표준 vs 최적화 RAG 워크플로우 성능 비교 테스트
+
+초보자용 설명:
+- 동일한 질의들을 표준/최적화 엔드포인트에 보내 응답 시간(서버/클라이언트)을 비교합니다.
+- 네트워크 호출이 포함되므로 서버가 실행 중이어야 합니다.
 """
 import json
 import time

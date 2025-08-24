@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Test workflow node and edge connections
+워크플로우 노드/간선 연결을 점검하는 간단한 테스트
+
+초보자용 설명:
+- LangGraph로 만들어진 그래프의 노드와 간선이 기대한 대로 존재하는지 확인합니다.
+- 이 파일은 네트워크를 호출하지 않고, 구조만 검증합니다.
 """
 import os
 import sys
@@ -23,7 +27,11 @@ else:
 sys.path.insert(0, str(project_root))
 
 def test_workflow_structure():
-    """Test the workflow structure"""
+    """워크플로우 구조 테스트
+
+    초보자용:
+    - 노드 목록과 간선(연결) 목록을 출력하고, 기대한 연결이 모두 있는지 체크합니다.
+    """
     try:
         from src.agents.rag_workflow import RAGWorkflow
         print("SUCCESS: Workflow imports successful")

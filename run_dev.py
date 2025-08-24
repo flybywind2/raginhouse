@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Development server runner for RAG Agent
+
+초보자용 설명:
+- 개발 환경에서 FastAPI 서버를 실행하는 진입점입니다.
+- `python run_dev.py`로 실행하면 자동 리로드(reload)가 켜진 상태로 서버가 뜹니다.
 """
 import os
 import sys
@@ -15,9 +19,11 @@ sys.path.insert(0, str(src_path))
 
 def main():
     # Set environment variables for development
+    # 초보자용: PYTHONPATH를 프로젝트 루트로 설정해 모듈 임포트가 편해집니다.
     os.environ.setdefault("PYTHONPATH", str(project_root))
     
     # Configure logging
+    # 초보자용: 개발 콘솔에서 보기 쉬운 포맷으로 로깅을 설정합니다.
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'

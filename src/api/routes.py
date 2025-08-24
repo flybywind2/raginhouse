@@ -17,6 +17,7 @@ from src.services.feedback_service import FeedbackService
 logger = logging.getLogger(__name__)
 
 # Services will be initialized on first use
+# 초보자용: 전역 변수에 None으로 두고, 실제로 필요한 시점에 생성해 재사용합니다(지연 초기화).
 rag_service = None
 rag_workflow = None
 cache_service = None
@@ -24,30 +25,35 @@ document_processor = None
 feedback_service = None
 
 def get_rag_service():
+    # 초보자용: 필요한 순간에 한 번만 생성하고 이후에는 재사용합니다.
     global rag_service
     if rag_service is None:
         rag_service = RAGService()
     return rag_service
 
 def get_rag_workflow():
+    # 초보자용: 표준 LangGraph 워크플로우 인스턴스를 제공합니다.
     global rag_workflow
     if rag_workflow is None:
         rag_workflow = RAGWorkflow()
     return rag_workflow
 
 def get_cache_service():
+    # 초보자용: Redis 기반 캐시 서비스 인스턴스를 제공합니다.
     global cache_service
     if cache_service is None:
         cache_service = CacheService()
     return cache_service
 
 def get_document_processor():
+    # 초보자용: 업로드/Confluence 문서 처리 담당 서비스입니다.
     global document_processor
     if document_processor is None:
         document_processor = DocumentProcessor()
     return document_processor
 
 def get_feedback_service():
+    # 초보자용: 사용자의 피드백(좋아요/싫어요 등)을 저장/집계합니다.
     global feedback_service
     if feedback_service is None:
         feedback_service = FeedbackService()
@@ -61,6 +67,9 @@ router = APIRouter()
 async def ask_question(request: QueryRequest) -> QueryResponse:
     """
     Process a RAG query using LangGraph workflow
+    
+    초보자용:
+    - 표준(순차) 워크플로우로 질문을 처리합니다.
     """
     try:
         logger.info(f"Processing query: {request.query_text[:100]}")
@@ -91,6 +100,9 @@ async def ask_question_optimized(request: QueryRequest) -> QueryResponse:
     - Intelligent caching with TTL policies
     - Retry policies for resilience
     - Performance optimizations from Context7 best practices
+    
+    초보자용:
+    - 검색 단계를 병렬 처리하여 성능을 높인 워크플로우입니다.
     """
     try:
         logger.info(f"Processing optimized query: {request.query_text[:100]}")
@@ -123,6 +135,10 @@ async def ask_question_stream(
 ):
     """
     Stream RAG query response using Server-Sent Events
+
+    초보자용:
+    - 서버가 처리 중간에도 메시지를 순차적으로 보내는 방식(SSE)입니다.
+    - dict를 문자열로 보내면 JSON이 아니므로, json.dumps로 직렬화해 보냅니다.
     """
     async def generate_stream():
         try:
@@ -160,6 +176,9 @@ async def ask_question_stream(
 async def submit_feedback(request: FeedbackRequest):
     """
     Submit user feedback for a query response
+    
+    초보자용:
+    - 사용자가 답변 품질에 대한 피드백을 남길 수 있습니다.
     """
     try:
         feedback_svc = get_feedback_service()
@@ -176,6 +195,9 @@ async def submit_feedback(request: FeedbackRequest):
 async def get_feedback_metrics() -> MetricsResponse:
     """
     Get feedback and performance metrics
+    
+    초보자용:
+    - 피드백 통계(비율, 사유)와 성능 지표를 반환합니다.
     """
     try:
         feedback_svc = get_feedback_service()
@@ -195,6 +217,10 @@ async def ingest_file(
 ):
     """
     Ingest a document file for processing
+
+    초보자용:
+    - 업로드된 파일을 배경 작업으로 처리하여 색인에 반영합니다.
+    - 허용된 확장자만 받도록 검증합니다.
     """
     try:
         # Validate file type
@@ -238,6 +264,9 @@ async def ingest_confluence_page(
 ):
     """
     Ingest a Confluence page
+
+    초보자용:
+    - Confluence 페이지를 가져와 색인에 반영합니다(배경 작업).
     """
     try:
         # Add background task for Confluence processing
@@ -266,6 +295,9 @@ async def ingest_confluence_page(
 async def get_cache_stats():
     """
     Get cache performance statistics
+    
+    초보자용:
+    - 캐시 히트/미스 등의 간단한 상태를 확인합니다.
     """
     try:
         cache_svc = get_cache_service()
@@ -281,6 +313,9 @@ async def get_cache_stats():
 async def clear_cache():
     """
     Clear all cache entries
+    
+    초보자용:
+    - RAG 관련 캐시를 초기화하고 카운터를 리셋합니다.
     """
     try:
         cache_svc = get_cache_service()
@@ -299,6 +334,9 @@ async def clear_cache():
 async def health_check():
     """
     Health check endpoint
+    
+    초보자용:
+    - 애플리케이션과 주요 컴포넌트가 정상인지 간단히 확인합니다.
     """
     try:
         # Check service health

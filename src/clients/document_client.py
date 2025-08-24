@@ -8,7 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentClient:
-    """Client for document insertion API (compatible with appendix/rag_input.py)"""
+    """Client for document insertion API (compatible with appendix/rag_input.py)
+
+    초보자용 설명:
+    - 외부 문서 입력 API에 청크 단위 문서를 전송해 색인합니다.
+    - 실패 시 재시도하고, 여러 문서는 반복 호출로 처리합니다.
+    """
     
     def __init__(self):
         self.base_url = settings.RAG_BASE_URL
@@ -23,6 +28,9 @@ class DocumentClient:
     ) -> bool:
         """
         Insert single document (compatible with appendix/rag_input.py format)
+
+        초보자용 설명:
+        - 단일 문서를 외부 API로 전송합니다. chunk_factor로 분할 정책을 전달합니다.
         """
         endpoint = f"{self.base_url}/insert-doc"
         
@@ -75,6 +83,10 @@ class DocumentClient:
     ) -> bool:
         """
         Insert multiple documents in batches
+
+        초보자용 설명:
+        - 문서 리스트를 순회하며 하나씩 전송합니다.
+        - 성공률이 80% 이상이면 전체 성공으로 간주합니다.
         """
         if not documents:
             logger.warning("No documents to insert")

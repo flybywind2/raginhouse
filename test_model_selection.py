@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Test script for model selection functionality
+모델 선택 기능을 간단히 확인하는 스크립트형 테스트
+
+초보자용 설명:
+- 서버가 떠 있을 때 여러 모델 이름을 넣어 요청해보고 응답을 비교합니다.
+- 네트워크 호출이 포함되므로 로컬 서버 실행이 필요합니다.
 """
 import json
 import requests

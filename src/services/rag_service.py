@@ -15,7 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 class RRFFusionService:
-    """RRF (Reciprocal Rank Fusion) implementation with adaptive weights"""
+    """RRF (Reciprocal Rank Fusion) implementation with adaptive weights
+
+    초보자용 설명:
+    - 여러 검색기의 순위 결과를 하나로 합치는 방법입니다.
+    - 각 검색기 결과의 순위를 이용해 점수를 합산하고 높은 순으로 정렬합니다.
+    """
     
     def __init__(self, k: int = 60):
         self.k = k
@@ -50,13 +55,22 @@ class RRFFusionService:
 
 
 class MMRContextSelector:
-    """MMR-based context selection for diversity"""
+    """MMR-based context selection for diversity
+
+    초보자용 설명:
+    - 문서 간 중복을 줄이고, 다양성이 있도록 문서를 고르는 기법입니다.
+    - relevance(관련성)와 diversity(다양성) 사이를 lambda로 조절합니다.
+    """
     
     def __init__(self, lambda_param: float = 0.7):
         self.lambda_param = lambda_param  # Balance relevance vs diversity
     
     def select_context(self, documents: List[Dict], token_budget: int = 4000) -> List[Dict]:
-        """Select diverse, relevant documents within token budget"""
+        """Select diverse, relevant documents within token budget
+
+        초보자용 설명:
+        - 토큰 예산(token_budget)을 넘지 않는 범위에서 관련성과 다양성을 균형 있게 선택합니다.
+        """
         if not documents:
             return []
         
@@ -123,7 +137,12 @@ class MMRContextSelector:
 
 
 class CrossEncoderReranker:
-    """Cross-encoder reranking service"""
+    """Cross-encoder reranking service
+
+    초보자용 설명:
+    - LLM 외부의 재랭킹 모델(교차 인코더)로 상위 후보들을 다시 평가하여 더 정확한 순서를 만듭니다.
+    - 서비스가 비활성화되어 있으면 원래 순서를 유지합니다.
+    """
     
     def __init__(self):
         self.endpoint = settings.RERANKING_ENDPOINT
@@ -171,7 +190,12 @@ class CrossEncoderReranker:
 
 
 class RAGService:
-    """Core RAG service orchestrator"""
+    """Core RAG service orchestrator
+
+    초보자용 설명:
+    - (비 LangGraph 경로) 단일 서비스 내에서 질의 확장→검색→융합/재랭킹→문맥→생성 흐름을 처리합니다.
+    - CacheService로 결과를 재사용하여 응답 속도를 높일 수 있습니다.
+    """
     
     def __init__(self):
         self.retriever_client = RetrieverClient()

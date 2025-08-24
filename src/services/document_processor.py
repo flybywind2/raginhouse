@@ -15,7 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 class DocumentProcessor:
-    """Document processing service using docling and LLM metadata generation"""
+    """Document processing service using docling and LLM metadata generation
+
+    초보자용 설명:
+    - 업로드 파일/Confluence 페이지를 읽어 구조를 분석하고, 작은 청크로 나눕니다.
+    - LLM으로 요약/토픽/언어 등 메타데이터를 생성합니다.
+    - 최종 청크를 외부 문서 입력 API에 전송해 색인합니다.
+    """
     
     def __init__(self):
         self.llm_client = LLMClient()
@@ -28,7 +34,11 @@ class DocumentProcessor:
         file: UploadFile,
         index_name: str
     ) -> bool:
-        """Process uploaded file with docling and ingest to RAG system"""
+        """Process uploaded file with docling and ingest to RAG system
+
+        초보자용 설명:
+        - 업로드된 파일을 임시로 저장한 후, docling으로 구조를 분석하고 청크로 분할하여 색인합니다.
+        """
         temp_file_path = None
         
         try:
@@ -75,7 +85,11 @@ class DocumentProcessor:
         page_id: str,
         index_name: str
     ) -> bool:
-        """Process Confluence page with single-page collection"""
+        """Process Confluence page with single-page collection
+
+        초보자용 설명:
+        - Confluence API에서 페이지를 불러와 텍스트만 추출하고, 청크로 나누어 색인합니다.
+        """
         try:
             # Fetch page content from Confluence
             page_data = await self._fetch_confluence_page(base_url, page_id)
@@ -123,7 +137,12 @@ class DocumentProcessor:
         doc_id: str,
         filename: str
     ) -> ProcessedDocument:
-        """Process document with docling for structure awareness"""
+        """Process document with docling for structure awareness
+
+        초보자용 설명:
+        - docling을 이용해 섹션/표/그림 정보를 인식하고, 섹션별 텍스트를 추출합니다.
+        - 일부 텍스트 샘플을 LLM에 전달해 요약/토픽 등 메타데이터를 만듭니다.
+        """
         try:
             # Import docling dynamically to handle optional dependency
             from docling.document_converter import DocumentConverter
@@ -180,7 +199,11 @@ class DocumentProcessor:
     
     
     async def _fetch_confluence_page(self, base_url: str, page_id: str) -> Optional[Dict[str, Any]]:
-        """Fetch Confluence page content"""
+        """Fetch Confluence page content
+
+        초보자용 설명:
+        - Confluence REST API를 호출해 페이지의 본문/메타데이터를 가져옵니다.
+        """
         try:
             # Construct API URL
             api_url = f"{base_url.rstrip('/')}/rest/api/content/{page_id}?expand=body.storage,metadata.labels"
@@ -212,7 +235,12 @@ class DocumentProcessor:
         page_data: Dict[str, Any],
         doc_id: str
     ) -> ProcessedDocument:
-        """Process Confluence page data"""
+        """Process Confluence page data
+
+        초보자용 설명:
+        - HTML 태그를 제거해 순수 텍스트를 만들고, 간단한 청크 나누기를 수행합니다.
+        - LLM으로 메타데이터를 생성합니다.
+        """
         try:
             title = page_data.get('title', 'Unknown Page')
             content = page_data.get('body', {}).get('storage', {}).get('value', '')
@@ -255,7 +283,12 @@ class DocumentProcessor:
         sections: List[Dict[str, Any]],
         metadata: DocumentMetadata
     ) -> List[Dict[str, Any]]:
-        """Structure-aware chunking using docling sections"""
+        """Structure-aware chunking using docling sections
+
+        초보자용 설명:
+        - 섹션 단위로 묶되, 너무 길면 설정된 크기 기준으로 나눕니다.
+        - 섹션 제목을 보존해 검색/인용 시 유용하게 씁니다.
+        """
         chunks = []
         chunk_index = 0
         
@@ -290,7 +323,11 @@ class DocumentProcessor:
         content: str,
         metadata: DocumentMetadata
     ) -> List[Dict[str, Any]]:
-        """Simple text chunking"""
+        """Simple text chunking
+
+        초보자용 설명:
+        - 길이에 따라 일정 크기로 텍스트를 자르고, 겹침(overlap)을 적용해 문맥 손실을 줄입니다.
+        """
         chunks = []
         text_chunks = self._split_text(content)
         
@@ -307,7 +344,11 @@ class DocumentProcessor:
         chunk_index: int,
         section_title: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Create chunk document for insertion"""
+        """Create chunk document for insertion
+
+        초보자용 설명:
+        - 검색 API 요구사항에 맞춘 필드로 하나의 청크를 문서 형태로 만듭니다.
+        """
         # Serialize metadata to flat string (required by API)
         additional_field = self._serialize_metadata(metadata, section_title)
         
@@ -327,7 +368,11 @@ class DocumentProcessor:
         metadata: DocumentMetadata,
         section_title: Optional[str] = None
     ) -> str:
-        """Serialize metadata to flat string format (required by API)"""
+        """Serialize metadata to flat string format (required by API)
+
+        초보자용 설명:
+        - 메타데이터를 단일 문자열로 펼쳐 저장합니다(외부 API 요구 형식).
+        """
         parts = [
             f"summary={metadata.summary or ''}",
             f"topics={','.join(metadata.topics)}",
@@ -339,7 +384,12 @@ class DocumentProcessor:
         return " | ".join(parts)
     
     def _split_text(self, text: str) -> List[str]:
-        """Split text into chunks with overlap"""
+        """Split text into chunks with overlap
+
+        초보자용 설명:
+        - 문장 경계나 줄바꿈을 우선 고려해 자연스러운 분할을 시도합니다.
+        - 다음 청크의 시작을 약간 겹치게 해 문맥 연속성을 높입니다.
+        """
         if len(text) <= self.max_chunk_size:
             return [text]
         
@@ -368,17 +418,29 @@ class DocumentProcessor:
         return [chunk for chunk in chunks if chunk.strip()]
     
     def _serialize_table(self, table) -> str:
-        """Serialize table to text representation"""
+        """Serialize table to text representation
+
+        초보자용 설명:
+        - 간단히 캡션만 문자열로 보존합니다(자세한 구조화는 생략).
+        """
         # Simplified table serialization
         return f"Table: {getattr(table, 'caption', 'No caption')}"
     
     def _serialize_figure(self, figure) -> str:
-        """Serialize figure to text representation"""
+        """Serialize figure to text representation
+
+        초보자용 설명:
+        - 간단히 캡션만 문자열로 보존합니다.
+        """
         # Simplified figure serialization
         return f"Figure: {getattr(figure, 'caption', 'No caption')}"
     
     def _detect_doc_type(self, filename: str) -> str:
-        """Detect document type from filename"""
+        """Detect document type from filename
+
+        초보자용 설명:
+        - 파일 확장자에 따라 문서 유형을 추정합니다.
+        """
         ext = Path(filename).suffix.lower()
         type_mapping = {
             '.pdf': 'pdf',
@@ -394,14 +456,22 @@ class DocumentProcessor:
         return type_mapping.get(ext, 'unknown')
     
     def _generate_doc_id(self, filename: str) -> str:
-        """Generate unique document ID"""
+        """Generate unique document ID
+
+        초보자용 설명:
+        - 파일명과 현재 시간을 합쳐 MD5 해시를 만들고, 앞부분만 ID로 씁니다.
+        """
         import hashlib
         timestamp = datetime.now().isoformat()
         content = f"{filename}_{timestamp}"
         return hashlib.md5(content.encode()).hexdigest()[:12]
     
     async def _extract_pdf_text(self, file_path: str) -> str:
-        """Extract text from PDF (simplified implementation)"""
+        """Extract text from PDF (simplified implementation)
+
+        초보자용 설명:
+        - PyPDF2로 페이지별 텍스트를 간단히 추출합니다(한계가 있습니다).
+        """
         try:
             import PyPDF2
             with open(file_path, 'rb') as file:
@@ -418,7 +488,11 @@ class DocumentProcessor:
             return ""
     
     async def _extract_docx_text(self, file_path: str) -> str:
-        """Extract text from DOCX (simplified implementation)"""
+        """Extract text from DOCX (simplified implementation)
+
+        초보자용 설명:
+        - python-docx로 단락 텍스트를 읽어와 합칩니다.
+        """
         try:
             from docx import Document
             doc = Document(file_path)
